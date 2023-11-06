@@ -1,4 +1,20 @@
 from configuraciones import *
+
+staticmethod
+def crear_lista(piso):
+    diccionario_enemigo = {}
+    diccionario_enemigo["izquierda"] = enemigo_camina
+    diccionario_enemigo["aplasta"] = enemigo_aplasta
+    coopa = Enemigo(diccionario_enemigo)
+    coopa.rectangulo.bottom = piso["rectangulo"].top
+
+    d = {"aplastado":diccionario_enemigo["aplasta"]}
+    reescalar_imagenes(d, 50, 25)
+
+    lista_enemigos = [coopa]
+
+    return lista_enemigos
+
 class Enemigo:
     def __init__(self, animaciones) -> None:
         self.animaciones = animaciones
@@ -29,5 +45,5 @@ class Enemigo:
 
     def actualizar(self, pantalla):
         if not self.estado_muerto:
-            self.animar(pantalla)
-            self.avanzar()
+            self.rectangulo.animar(pantalla)
+            self.rectangulo.avanzar()

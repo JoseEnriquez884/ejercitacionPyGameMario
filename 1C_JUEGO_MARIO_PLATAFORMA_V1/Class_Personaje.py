@@ -72,13 +72,14 @@ class Personaje:
                 self.desplazamiento_y += self.gravedad
     
         for pl in plataformas:
-            if self.rectangulo_principal.colliderect(pl["rectangulo"]):
-                self.esta_saltando = False
-                self.desplazamiento_y = 0
-                self.rectangulo_principal.bottom = pl["rectangulo"].top  
-                break
-            else:
-                self.esta_saltando = True
+            if not pl["premio"]:
+                if self.rectangulo_principal.colliderect(pl["rectangulo"]):
+                    self.esta_saltando = False
+                    self.desplazamiento_y = 0
+                    self.rectangulo_principal.bottom = pl["rectangulo"].top  
+                    break
+                else:
+                    self.esta_saltando = True
 
     def verificar_colision_enemigo(self,pantalla, lista_enemigos):
         for enemigo in lista_enemigos:
@@ -88,6 +89,17 @@ class Personaje:
                 enemigo.esta_muriendo = True
                 enemigo.rectangulo.y += 3
                 print("choco")
+
+    def romper_bloque(self,lista_plataformas,flor):
+        for plataforma in lista_plataformas:
+            if plataforma["premio"]:
+                if self.rectangulo_principal.colliderect(plataforma["rectangulo"]):
+                    flor["descubierta"] = True
+                    plataforma["premio"] = False
+
+            
+
+
 
 
 

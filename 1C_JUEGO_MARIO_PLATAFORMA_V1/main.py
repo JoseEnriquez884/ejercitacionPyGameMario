@@ -5,7 +5,7 @@ from configuraciones import *
 from modo import *
 from Class_Enemigo import *
 
-def crear_plataforma(path, ancho, alto, x, y, es_visible):
+def crear_plataforma(path, ancho, alto, x, y, es_visible,tiene_premio):
     plataforma = {}
     
     if es_visible:
@@ -18,6 +18,7 @@ def crear_plataforma(path, ancho, alto, x, y, es_visible):
     plataforma["rectangulo"] = plataforma["imagen"].get_rect() 
     plataforma["rectangulo"].x = x
     plataforma["rectangulo"].y = y
+    plataforma["premio"] = tiene_premio
 
     return plataforma
 
@@ -51,29 +52,48 @@ mario = Personaje(diccionario, (70,60), 50,600,5)
 
 #PLATAFORMAS
 
-piso = crear_plataforma("",W,20,0,0,False)
+piso = crear_plataforma("",W,20,0,0,False,False)
 piso["rectangulo"].top = mario.rectangulo_principal.bottom
 
 
-plataforma_caño = crear_plataforma(r"Corre\Caño (2).png", 100,100,0,0,True)
+plataforma_caño = crear_plataforma(r"Corre\Caño (2).png", 100,100,0,0,True,False)
 plataforma_caño["rectangulo"].x = 850
 plataforma_caño["rectangulo"].bottom = piso["rectangulo"].top 
 
-plataforma_invisible = crear_plataforma("", 247, 167, 950, 495,False)
+plataforma_invisible = crear_plataforma("", 247, 167, 950, 495,False,False)
+
+
+lista_enemigos = Enemigo.crear_lista(piso)
+
+premio = crear_plataforma("",60, 50, 703, 439,False)
+
+flor = {}
+
+flor["superficie"] = flor_fuego[0]
+flor["superficie"] = pygame.transform.scale(flor["superficie"], (80,80))
+flor["rectangulo"] = flor["superficie"].get_rect()
+
+flor["rectangulo"].bottom = premio["rectangulo"].top
+flor["rectangulo"].x = 703
+flor["rectangulo"].y = 360
+#12:41
+flor["descubierta"] = False
+flor["tocada"] = False 
+
+
 
 plataformas = [piso, plataforma_caño]
-
 #ENEMIGO 
-diccionario_enemigo = {}
-diccionario_enemigo["izquierda"] = enemigo_camina
-diccionario_enemigo["aplasta"] = enemigo_aplasta
-coopa = Enemigo(diccionario_enemigo)
-coopa.rectangulo.bottom = piso["rectangulo"].top
+# diccionario_enemigo = {}
+# diccionario_enemigo["izquierda"] = enemigo_camina
+# diccionario_enemigo["aplasta"] = enemigo_aplasta
+# coopa = Enemigo(diccionario_enemigo)
+# coopa.rectangulo.bottom = piso["rectangulo"].top
 
-d = {"aplastado":diccionario_enemigo["aplasta"]}
-reescalar_imagenes(d, 50, 25)
+# d = {"aplastado":diccionario_enemigo["aplasta"]}
+# reescalar_imagenes(d, 50, 25)
 
-lista_enemigos = [coopa]
+# lista_enemigos = [coopa]
 
 while True:
     RELOJ.tick(FPS) 
@@ -102,22 +122,34 @@ while True:
     PANTALLA.blit(plataforma_caño["imagen"], plataforma_caño["rectangulo"])
     
     mario.actualizar(PANTALLA, plataformas)
+    
+
+    mario.verificar_colision_enemigo(PANTALLA,lista_enemigos)
+
     for enemigo in lista_enemigos:
+        if not enemigo.esta_muriendo and not enemigo.esta_muerto:
         enemigo.actualizar(PANTALLA)
     # coopa.actualizar(PANTALLA)
     # mario.verificar_colision_enemigo(PANTALLA,lista_enemigos)
     
-    for enemigo in lista_enemigos:
+    for enemigo in lista_enemigos[:]:
         if enemigo.esta_muerto:
-            # lista_enemigos.remove(enemigo) no pierde visibilidad nunca
+            lista_enemigos.remove(enemigo) 
             del enemigo
             break
 
-    
+    mario.romper_bloque(plataformas,flor)
+
+    if flor["descubierta"] and not flor["tocada"]:
+        PANTALLA.blit(flor["superficie"],flor["rectangulo"])
+
+
     if get_mode() == True:
         pygame.draw.rect(PANTALLA,"green",mario.rectangulo_principal,3)
         for plataforma in plataformas:
             pygame.draw.rect(PANTALLA,"blue",plataforma["rectangulo"],3)
             pygame.draw.rect(PANTALLA,"red",plataforma_caño["rectangulo"],3)
-    
+
+        for enemigo in lista_enemigos:
+            pygame.draw.rect(PANTALLA,"orange",enemigo.rectangulo,3)
     pygame.display.update()
